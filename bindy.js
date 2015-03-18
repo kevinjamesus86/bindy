@@ -1,3 +1,8 @@
+/*!
+ * bindy - a jQuery like event API for the Google Maps MVCObject and its chilluns
+ * license MIT (c) Kevin James 2015
+ * https://github.com/kevinjamesus86/bindy
+*/
 (function(gMaps) {
   'use strict';
 
