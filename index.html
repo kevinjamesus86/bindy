@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>bindy</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/normalize/3.0.2/normalize.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Merriweather:700">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/mono-blue.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <nav><!--
+   --><a href="#get">Get started</a><small>/</small><!--
+   --><a href="#why">Why</a><small>/</small><!--
+   --><a href="#what">What you get</a><small>/</small><!--
+   --><a href="#api">API</a><!--
+--></nav>
+  </header>
+  <div class="bigmap">
+    <div class="map-container">
+      <div class="map-canvas"></div>
+    </div>
+    <div class="over-map">
+      <h1 class="huro">
+        Bindy
+      </h1>
+      <div class="left-vs-right"><!--
+     --><div class="left-example">
+          <p class="example-label">do this</p>
+          <pre>
+            <code class="hljs javascript">
+              // map is ready to roll
+              map.on('idle tilesloaded bounds_changed', function interactive(e) {
+                // remove the remaining events
+                map.off(interactive)
+                // do the stuff
+              })
+            </code>
+          </pre>
+        </div><!--
+     --><div class="right-example">
+          <p class="example-label">instead of this</p>
+          <pre>
+            <code class="hljs javascript">
+              var fired,
+                // map is ready to roll
+                interactive = function interactive() {
+                  // don't run this more than once
+                  if (!fired) {
+                    fired = true
+                    // remove the remaining events
+                    interactiveListeners.forEach(google.maps.event.removeListener)
+                    // do the stuff
+                  }
+                }
+              var addListener = google.maps.event.addListener,
+                interactiveListeners = [
+                  addListener(map, 'idle', interactive),
+                  addListener(map, 'tilesloaded', interactive),
+                  addListener(map, 'bounds_changed', interactive)
+                ]
+            </code>
+          </pre>
+        </div><!--
+   --></div>
+    </div>
+  </div>
+
+  <div id="top" class="doc">
+
+    <h1 id="get">Get started</h1>
+
+    <p>Include the scripts</p>
+
+    <pre>
+      <code class="hljs html">
+        &#x3C;script src=&#x22;https://maps.googleapis.com/maps/api/js?v=3&#x22;&#x3E;&#x3C;/script&#x3E;
+        &#x3C;script src=&#x22;bindy.js&#x22;&#x3E;&#x3C;/script&#x3E;
+      </code>
+    </pre>
+
+    <p>Add some events</p>
+
+    <pre>
+      <code class="hljs javascript">
+        var poi = new google.maps.Marker({
+          position: {
+            lat: 45.517,
+            lng: -122.670
+          }
+        })
+
+        poi.on({
+          click: function() {
+            console.log('clickity click!')
+          },
+          'mouseover mouseout': function(e) {
+            console.log("you " + e.event + "'d me!")
+          }
+        })
+      </code>
+    </pre>
+
+    <h1 id="why">Why</h1>
+
+    <p>
+      Let me start by saying that the <a href="https://developers.google.com/maps/web/">Google Maps JavaScript API</a>
+      is excellent. It is well documented, easy to work with, and
+      <a href="#consistent">for the most part</a> consistent. This is not intended
+      to be a fix, I do not believe they've done it wrong. Rather, it is an attempt
+      to formalize my project-to-project efforts of creating a familiar event
+      API for Google Maps.
+    </p>
+
+    <strong>Actual why</strong>
+
+    <p>
+      Each time I work with the Maps API I create an event wrapper for the
+      <code>google.maps.event</code> namespace. From scratch. For some reason
+      I am compelled to do this <em>before</em> getting any actual work done.
+      Whether or not that's a good thing is a topic for another day. Anyway,
+      it all started out very simple. Bind multiple events at once, one time
+      bindings, return a function to remove said events, etc. Over time it
+      started to look a bit like jQuery's unintelligent cousin so I figured hey,
+      why not match the jQuery event API sans selectors and data? It's familiar
+      to many and brilliantly concise. This is my best crack at doing just that.
+    </p>
+
+    <h1 id="what">What you get</h1>
+
+    <p>
+      The following <a href="#api">API</a> for any object or class that extends
+      <code>google.maps.MVCObject</code>. There are many, many classes in the
+      Maps API that extend MVCObject. 33 or more according to my ctrl+f of "extends MVCObject".
+    </p>
+
+    <strong>for example</strong>
+
+    <ul class="dense links">
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Map">Map</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Data">Data</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Marker">Marker</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#InfoWindow">InfoWindow</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Polyline">Polyline</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Polygon">Polygon</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Rectangle">Rectangle</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Circle">Circle</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#GroundOverlay">GroundOverlay</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#OverlayView">OverlayView</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#MapCanvasProjection">MapCanvasProjection</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#DirectionsRenderer">DirectionsRenderer</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#FusionTablesLayer">FusionTablesLayer</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#MVCArray">MVCArray</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#Autocomplete">Autocomplete</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#SearchBox">SearchBox</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#DrawingManager">DrawingManager</a></li>
+      <li><a href="https://developers.google.com/maps/documentation/javascript/reference#WeatherLayer">WeatherLayer</a></li>
+      <li>and more</li>
+    </ul>
+
+    <p>
+      will come packed with
+      <a href="#on">.on()</a>,
+      <a href="#one">.one()</a>, and
+      <a href="#off">.off()</a>
+    </p>
+
+    <strong id="consistent">the EventObject</strong>
+
+    <p>
+      Not all events are created equal. That is, not all of them have an EventObject.
+      For the sake of consistency we will always pass an EventObject as the first
+      argument to a handler function.
+    </p>
+
+    <pre>
+      <code>
+        // custom
+        EventObject {
+          event     : event name,
+          timeStamp : event creation time in milliseconds
+          ...         props from native event, if any
+        }
+
+        // native
+        google.maps.MouseEvent {
+          latLng : the latlng where the event occurred,
+          stop() : prevents event from propagating further
+        }
+      </code>
+    </pre>
+
+    <h1 id="api">API</h1>
+
+    <h2 id="on" class="method">.on(events [, handler])</h2>
+
+    <p>
+      Attaches the given handler function to one or more events
+    </p>
+
+    <strong>
+      object.on(events, handler)
+    </strong>
+
+    <ul>
+      <li>
+        <strong>events</strong> <br>
+        Type: String <br>
+        One or more space separated events
+      </li>
+      <li>
+        <strong>handler</strong><br>
+        Type: Function <br>
+        A function to call when the event is triggered
+      </li>
+    </ul>
+
+    <strong>
+      object.on(events)
+    </strong>
+
+    <ul>
+      <li>
+        <strong>events</strong> <br>
+        Type: Object <br>
+        An event map where the keys are one or more space separated events,
+        and the values are the handler function to be called
+      </li>
+    </ul>
+
+    <div class="example">
+      <strong>example</strong>
+
+      <pre>
+        <code class="hljs javascript">
+          /**
+           * NOTE
+           * this object is used in all the demos so just know that
+           * when you see portland.*() elsewhere, it's a real thing
+           */
+
+          var portland = new google.maps.Marker({
+            position: {
+              lat: 45.5177241,
+              lng: -122.6704882
+            }
+          })
+        </code>
+      </pre>
+
+      <pre>
+        <code class="hljs javascript">
+          portland.on('mouseover mouseout', function(e) {
+            if ('mouseover' == e.event) {
+              console.log("welcome to a whole lot of Awesome")
+            } else {
+              console.log('aww, sad to see you go')
+            }
+          })
+        </code>
+      </pre>
+
+      or
+
+      <pre>
+        <code class="hljs javascript">
+          portland.on({
+            'mouseover mouseout': function(e) {
+              if ('mouseover' == e.event) {
+                console.log("welcome to a whole lot of Awesome")
+              } else {
+                console.log('aww, sad to see you go')
+              }
+            }
+          })
+        </code>
+      </pre>
+    </div>
+
+    <h2 id="one" class="method">.one(events [, handler])</h2>
+    <p>
+      Attaches the given handler function to one or more events.
+      At most, the handler will be called once per event
+    </p>
+
+    <strong>
+      object.one(events, handler)
+    </strong>
+
+    <ul>
+      <li>
+        <strong>events</strong> <br>
+        Type: String <br>
+        One or more space separated events
+      </li>
+      <li>
+        <strong>handler</strong><br>
+        Type: Function <br>
+        A function to call when the event is triggered
+      </li>
+    </ul>
+
+    <strong>
+      object.one(events)
+    </strong>
+
+    <ul>
+      <li>
+        <strong>events</strong> <br>
+        Type: Object <br>
+        An event map where the keys are one or more space separated events,
+        and the values are the handler function to be called
+      </li>
+    </ul>
+
+    <div class="example">
+      <strong>example</strong>
+
+      <pre>
+        <code class="hljs javascript">
+          /**
+           * THE HAPS
+           * user    -> clickity click (2x)
+           * console -> you clicked on Portland! (1x)
+           */
+        </code>
+      </pre>
+
+      <pre>
+        <code class="hljs javascript">
+          portland.one('click', function(e) {
+            console.log('you clicked on Portland!')
+          })
+        </code>
+      </pre>
+
+      or
+
+      <pre>
+        <code class="hljs javascript">
+          portland.one({
+            click: function(e) {
+              console.log('you clicked on Portland!')
+            }
+          })
+        </code>
+      </pre>
+    </div>
+
+    <h2 id="off" class="method">.off([events] [, handler])</h2>
+
+    <p>Removes a previously bound handler function</p>
+
+    <strong>
+      object.off(events [, handler])
+    </strong>
+
+    <ul>
+      <li>
+        <strong>events</strong> <br>
+        Type: String <br>
+        One or more space separated events
+      </li>
+      <li>
+        <strong>handler</strong> <br>
+        Type: Function <br>
+        A optional handler function previously bound to the event(s)
+      </li>
+    </ul>
+
+    <strong>
+      object.off(events)
+    </strong>
+
+    <ul>
+      <li>
+        <strong>events</strong> <br>
+        Type: Object <br>
+        An event map where the keys are one or more space separated events,
+        and the values are a previously bound handler function
+      </li>
+    </ul>
+
+    <strong>
+      object.off(event)
+    </strong>
+
+    <ul>
+      <li>
+        <strong>event</strong> <br>
+        Type: Event <br>
+        An EventObject as passed to the event handler function
+      </li>
+    </ul>
+
+    <strong>
+      object.off()
+    </strong>
+
+    <ul>
+      <li>
+        <i>no args</i> &#8212; we'll talk about this in greater detail soon
+      </li>
+    </ul>
+
+    <div class="example">
+      <strong>example</strong>
+
+      <pre>
+        <code class="hljs javascript">
+          var handler
+          portland.on('click mouseover', handler = function(e) {
+            // do the things
+          })
+
+          // remove all events bound to `handler`
+          portland.off(handler)
+
+          // remove all click events
+          portland.off('click')
+
+          // remove all click events bound to `handler`
+          portland.off('click', handler)
+
+          // remove all mouseover events
+          portland.off('mouseover')
+
+          // remove all mouseover events bound to `handler`
+          portland.off('mouseover', handler)
+
+          // remove all click and mouseover events
+          portland.off('click mouseover')
+
+          // remove all click and mouseover events that are bound to `handler`
+          portland.off('click mouseover', handler)
+        </code>
+      </pre>
+
+      &#9660;
+
+      <pre>
+        <code class="hljs javascript">
+          portland.one('click', function() {
+            // do stuff once
+          })
+        </code>
+      </pre>
+
+      is equivalent to
+
+      <pre>
+        <code class="hljs javascript">
+          portland.on('click', function(e) {
+            this.off(e)
+            // do stuff once
+          })
+        </code>
+      </pre>
+
+      &#9650;
+
+      <pre>
+        <code class="hljs javascript">
+          portland.on('click position_changed', function handler(e) {
+            // do stuff once
+
+            /**
+             * remove the remaining events bound to `handler`
+             * making sure we only run this code one time
+             */
+            this.off(handler)
+
+            /**
+             * `e.event` can be 'click' or 'position_changed'
+             * depending on which event happened first
+             */
+            console.log(e.event)
+          })
+        </code>
+      </pre>
+
+      <p>
+        <strong>object.off() explained</strong>
+      </p>
+
+      <pre>
+        <code class="hljs javascript">
+          // remove all the things
+          portland.off()
+        </code>
+      </pre>
+
+      <p>
+        Okay, I'll admit that this method doesn't look crazy special.. but it
+        does offer a single important advantage over the provided
+        <code>clearInstanceListeners</code> method.
+      </p>
+
+      <pre>
+        <code class="hljs javascript">
+          // remove all the things
+          portland.off()
+
+          // remove ALL the things, actually
+          google.maps.event.clearInstanceListeners(portland)
+        </code>
+      </pre>
+
+      <p>
+        While <code>object.off()</code> will remove all the events that have
+        been bound via <code>object.on</code> and <code>object.one</code>,
+        it <strong>will not</strong> remove events bound at the objects
+        instantiation.
+      </p>
+
+      <p>
+        When and why is this useful? Awesome question. As it stands, the
+        Maps API doesn't actually support full tear-down of an
+        <code>google.maps.Map</code> instance. If you're into recycling you may
+        use a single, or as few as necessary, map instances throughout the
+        lifetime of your single page app. While you may want to remove a map's
+        event listeners while it's not in use, you likely don't want to remove
+        the ones it came with. So how do you remove not too many, and not too few,
+        but just the right amount?
+      </p>
+
+      <pre>
+        <code class="hljs javascript">
+          map.off()
+        </code>
+      </pre>
+
+      <p>
+        And if you really do want to remove all the events?
+      </p>
+
+      <pre>
+        <code class="hljs javascript">
+          map.off(true)
+        </code>
+      </pre>
+
+      <p>tada</p>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
+  <script>
+    /*!
+      * domready (c) Dustin Diaz 2014 - License MIT
+      */
+    !function(e,t){typeof module!="undefined"?module.exports=t():typeof define=="function"&&typeof define.amd=="object"?define(t):this[e]=t()}("domready",function(){var e=[],t,n=document,r=n.documentElement.doScroll,i="DOMContentLoaded",s=(r?/^loaded|^c/:/^loaded|^i|^c/).test(n.readyState);return s||n.addEventListener(i,t=function(){n.removeEventListener(i,t),s=1;while(t=e.shift())t()}),function(t){s?t():e.push(t)}});
+
+    var
+      win = window,
+      doc = win.document,
+      slice = Array.prototype.slice,
+      each = Array.prototype.forEach,
+      re_blank = /^[\s\ufeff\xa0]*$/;
+
+    function query(sel, el) {
+      return slice.call((el || doc).querySelectorAll(sel), 0);
+    }
+
+    function addEvent(el, ev, fn) {
+      ev.split(' ').forEach(function(ev) {
+        el.addEventListener(ev, fn, false);
+      });
+    }
+
+    function indent(text) {
+      text = text.split(/[\r\n]/);
+      while (text.length && re_blank.test(text[0])) text.shift();
+      while (text.length && re_blank.test(text[text.length - 1])) text.pop();
+      return text = text.join('\n'), text.replace(new RegExp(
+        '^'+ text.match(/^ */gm).filter(Boolean).sort()[0], 'gm'),
+        '');
+    }
+
+    function empty(el) {
+      return each.call(el.childNodes, el.removeChild, el), el;
+    }
+
+    query('pre > code').forEach(function(code) {
+      empty(code.parentElement).appendChild(code);
+      code.textContent = indent(code.textContent);
+      if (code.classList.contains('hljs')) {
+        hljs.highlightBlock(code);
+      }
+    });
+
+    var map;
+    domready(function() {
+
+      map = new google.maps.Map(query('.map-canvas')[0], {
+        zoom: 14,
+        center: {
+          lat: 45.5177241,
+          lng: -122.6704882
+        },
+        draggable: false,
+        panControl: false,
+        zoomControl: false,
+        scrollwheel: false,
+        mapTypeControl: false,
+        streetViewControl: false,
+        backgroundColor: '#fff',
+        styles: [{"featureType":"landscape","stylers":[{"saturation":-100},{"lightness":65},{"visibility":"on"}]},{"featureType":"poi","stylers":[{"saturation":-100},{"lightness":51},{"visibility":"simplified"}]},{"featureType":"road.highway","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"road.arterial","stylers":[{"saturation":-100},{"lightness":30},{"visibility":"on"}]},{"featureType":"road.local","stylers":[{"saturation":-100},{"lightness":40},{"visibility":"on"}]},{"featureType":"transit","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"administrative.province","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"on"},{"lightness":-25},{"saturation":-100}]},{"featureType":"water","elementType":"geometry","stylers":[{"hue":"#ffff00"},{"lightness":-25},{"saturation":-97}]}]
+      });
+
+
+      var bigmapEl = query('.bigmap')[0],
+        scaleEl = query('.map-container')[0],
+        bigmapHeight = bigmapEl.offsetHeight,
+        scaleReq,
+        centerReq,
+        center;
+
+      addEvent(win, 'orientationchange resize', function() {
+        bigmapHeight = bigmapEl.offsetHeight;
+        center = center || map.getCenter();
+
+        win.clearTimeout(centerReq);
+        centerReq = win.setTimeout(function() {
+          map.panTo(center);
+          center = null;
+        }, 100);
+      });
+
+      scaleIt();
+      addEvent(doc, 'scroll', function() {
+        scaleIt();
+      });
+      function scaleIt() {
+        var top = win.pageYOffset ||  doc.documentElement.scrollTop || doc.body.scrollTop;
+        if (!scaleReq && bigmapHeight >= top) {
+          scaleReq = win.requestAnimationFrame(function() {
+            var scale = 1 + top / bigmapHeight / 3.33;
+            scaleEl.style.transform = 'scale(' + scale + ') translateZ(0px)';
+            scaleReq = null;
+          });
+        }
+      }
+
+    });
+
+  </script>
+</body>
+</html>
