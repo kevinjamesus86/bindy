@@ -97,6 +97,7 @@ nav small {
   bottom: 0;
   left: 0;
   position: absolute;
+  will-change: transform;
 }
 
 .map-canvas {
