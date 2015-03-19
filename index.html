@@ -639,8 +639,12 @@
         var top;
         if (!scaleReq && bigmapHeight >= (top = getPageYOffset())) {
           scaleReq = win.requestAnimationFrame(function() {
-            var scale = 1 + top / bigmapHeight / 3.33;
-            scaleEl.style.transform = 'scale(' + scale + ') translateZ(0px)';
+            var scale = 1 + top / bigmapHeight / 3.33,
+              translateY = top / 3.33;
+
+            scaleEl.style.transform = ' scale(' + scale + ')' +
+                                      ' translateY(' + translateY + 'px)' +
+                                      ' translateZ(0px)';
             scaleReq = null;
           });
         }
