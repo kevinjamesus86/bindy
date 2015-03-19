@@ -571,20 +571,46 @@
       re_blank = /^[\s\ufeff\xa0]*$/,
 
       dom = {
-        header: query('header')[0],
-        burg: query('.burg')[0],
-        nav: query('nav')[0],
-        bigmap: query('.bigmap')[0],
-        mapcontainer: query('.map-container')[0]
+        header: query('header', 1),
+        burg: query('.burg', 1),
+        nav: query('nav', 1),
+        bigmap: query('.bigmap', 1),
+        mapcontainer: query('.map-container', 1)
       };
 
-    function query(sel, el) {
-      return slice.call((el || doc).querySelectorAll(sel), 0);
+    function query(sel, el, one) {
+      var isOne = 1 === one || 1 === el;
+      el = el && el.nodeName ? el : doc;
+      return  isOne ?
+        el.querySelector(sel) :
+        slice.call(el.querySelectorAll(sel), 0);
+    }
+
+    function classReg(s) {
+      return new RegExp('(^|\\s+)' + s + '(\\s+|$)', 'g');
+    }
+
+    function hasClass(el, s) {
+      return classReg(s).test(el.className);
+    }
+
+    function addClass(el, s) {
+      el.className = (el.className + ' ' + s).trim();
+    }
+
+    function removeClass(el, s) {
+      el.className = el.className.replace(classReg(s), ' ').trim();
     }
 
     function addEvent(el, ev, fn) {
       ev.split(' ').forEach(function(ev) {
         el.addEventListener(ev, fn, false);
+      });
+    }
+
+    function removeEvent(el, ev, fn) {
+      ev.split(' ').forEach(function(ev) {
+        el.removeEventListener(ev, fn, false);
       });
     }
 
@@ -601,10 +627,16 @@
       return each.call(el.childNodes, el.removeChild, el), el;
     }
 
+    ////////////////////////////////
+    // DO WORK /////////////////////
+    ////////////////////////////////
+
+    // reindent code samples
     query('pre > code').forEach(function(code) {
       empty(code.parentElement).appendChild(code);
       code.textContent = indent(code.textContent);
-      if (code.classList.contains('hljs')) {
+
+      if (hasClass(code, 'hljs')) {
         hljs.highlightBlock(code);
       }
     });
@@ -616,34 +648,50 @@
       mq.addListener(handleBurg);
 
       function handleBurg(mq) {
-        mq.matches ? yesBurg() : noBurg();
+        if (mq.matches) {
+          activateBurg();
+        } else {
+          deactivateBurg();
+        }
       }
 
-      var burgClick,
+      var transitionEndEvents = 'webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend',
+        burgIsOpen,
+        burgClick,
         navClick;
 
-      function yesBurg() {
-        var active;
+      function activateBurg() {
         // close burg on nav click
         addEvent(dom.nav, 'click', navClick = function() {
-          active = false;
-          dom.burg.classList.remove('active');
+          burgIsOpen = false;
+          removeClass(dom.nav, 'nav-active');
         });
         // toggle nav on burg click
         addEvent(dom.burg, 'click', burgClick = function(e) {
-          if (active = !active) {
-            dom.burg.classList.add('active');
+          burgIsOpen = !burgIsOpen;
+
+          if (burgIsOpen) {
+            addClass(dom.nav, 'nav-active');
+            win.requestAnimationFrame(function() {
+              addClass(dom.nav, 'in');
+            });
           } else {
-            dom.burg.classList.remove('active');
+            removeClass(dom.nav, 'in');
+            addEvent(dom.nav, transitionEndEvents, function transitionEnd() {
+              removeClass(dom.nav, 'nav-active');
+              removeEvent(dom.nav, transitionEndEvents, transitionEnd);
+            });
           }
         });
       }
 
-      function noBurg(){
+      function deactivateBurg() {
+        burgIsOpen = false;
         if (burgClick) {
-          dom.burg.classList.remove('active');
-          dom.nav.removeEventListener('click', navClick, false);
-          dom.burg.removeEventListener('click', burgClick, false);
+          removeClass(dom.nav, 'in');
+          removeClass(dom.nav, 'nav-active');
+          removeEvent(dom.nav, 'click', navClick);
+          removeEvent(dom.burg, 'click', burgClick);
           burgClick = navClick = null;
         }
       }
@@ -652,7 +700,7 @@
     var map;
     domready(function() {
 
-      map = new google.maps.Map(query('.map-canvas')[0], {
+      map = new google.maps.Map(query('.map-canvas', 1), {
         zoom: 14,
         center: {
           lat: 45.5177241,
