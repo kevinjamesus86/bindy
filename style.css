@@ -59,28 +59,63 @@ header {
               0 10px 24px rgba(0, 0, 0, 0.2);
   top: 0; left: 0; right: 0;
   position: absolute;
-  overflow: hidden;
   z-index: 10;
 }
 
-header > nav {
+nav {
   margin: 0 auto;
   max-width: 768px;
 }
 
 nav a {
   padding: 0 24px;
-  /*font-weight: 700;*/
   text-shadow: 0 1px #fff;
 }
 
-nav a:hover,
-nav a:active {
-  background-color: transparent;
+.burg {
+  height: 60px;
+  padding: 20px 24px;
+  position: absolute;
+  right: 0; top: 0;
+  display: none;
 }
 
-nav small {
-  color: #bbbbc7
+.burg > i {
+  width: 20px;
+  height: 2px;
+  margin-top: 4px;
+  background-color: #5c9df5;
+  transition: background-color 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  display: block;
+}
+
+.burg:hover > i {
+  background-color: #4788e0;
+}
+
+@media (max-width: 450px) {
+  nav {
+    display: none;
+    background-color: #fff;
+    box-shadow: 0 6px 48px rgba(0, 0, 0, 0.3);
+  }
+
+  nav > a {
+    display: block;
+  }
+
+  nav > a:hover {
+    background-color: #f5f5f7;
+  }
+
+  .burg {
+    display: inline-block;
+  }
+
+  .burg:active + nav,
+  .burg.active + nav {
+    display: block;
+  }
 }
 
 .bigmap {

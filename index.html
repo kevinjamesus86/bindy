@@ -11,12 +11,17 @@
 </head>
 <body>
   <header>
+    <a class="burg">
+      <i></i>
+      <i></i>
+      <i></i>
+    </a>
     <nav><!--
-   --><a href="#get">Get started</a><small>/</small><!--
-   --><a href="#why">Why</a><small>/</small><!--
-   --><a href="#what">What you get</a><small>/</small><!--
+   --><a href="#get">Get started</a><!--
+   --><a href="#why">Why</a><!--
+   --><a href="#what">What you get</a><!--
    --><a href="#api">API</a><!--
---></nav>
+ --></nav>
   </header>
   <div class="bigmap">
     <div class="map-container">
@@ -548,19 +553,30 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/highlight.min.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?v=3"></script>
-  <script src="https://rawgit.com/kevinjamesus86/bindy/master/bindy.js"></script>
+  <script fo-src="https://rawgit.com/kevinjamesus86/bindy/master/bindy.js"></script>
   <script>
     /*!
       * domready (c) Dustin Diaz 2014 - License MIT
       */
     !function(e,t){typeof module!="undefined"?module.exports=t():typeof define=="function"&&typeof define.amd=="object"?define(t):this[e]=t()}("domready",function(){var e=[],t,n=document,r=n.documentElement.doScroll,i="DOMContentLoaded",s=(r?/^loaded|^c/:/^loaded|^i|^c/).test(n.readyState);return s||n.addEventListener(i,t=function(){n.removeEventListener(i,t),s=1;while(t=e.shift())t()}),function(t){s?t():e.push(t)}});
+    /*! matchMedia() polyfill - Test a CSS media type/query in JS. Authors & copyright (c) 2012: Scott Jehl, Paul Irish, Nicholas Zakas, David Knight. Dual MIT/BSD license */
+    window.matchMedia||(window.matchMedia=function(){"use strict";var e=window.styleMedia||window.media;if(!e){var t=document.createElement("style"),n=document.getElementsByTagName("script")[0],i=null;t.type="text/css",t.id="matchmediajs-test",n.parentNode.insertBefore(t,n),i="getComputedStyle"in window&&window.getComputedStyle(t,null)||t.currentStyle,e={matchMedium:function(e){var n="@media "+e+"{ #matchmediajs-test { width: 1px; } }";return t.styleSheet?t.styleSheet.cssText=n:t.textContent=n,"1px"===i.width}}}return function(t){return{matches:e.matchMedium(t||"all"),media:t||"all"}}}()),function(){if(window.matchMedia&&window.matchMedia("all").addListener)return!1;var e=window.matchMedia,t=e("only all").matches,n=!1,i=0,a=[],d=function(){clearTimeout(i),i=setTimeout(function(){for(var t=0,n=a.length;n>t;t++){var i=a[t].mql,d=a[t].listeners||[],r=e(i.media).matches;if(r!==i.matches){i.matches=r;for(var c=0,m=d.length;m>c;c++)d[c].call(window,i)}}},30)};window.matchMedia=function(i){var r=e(i),c=[],m=0;return r.addListener=function(e){t&&(n||(n=!0,window.addEventListener("resize",d,!0)),0===m&&(m=a.push({mql:r,listeners:c})),c.push(e))},r.removeListener=function(e){for(var t=0,n=c.length;n>t;t++)c[t]===e&&c.splice(t,1)},r}}();
 
     var
       win = window,
       doc = win.document,
+
       slice = Array.prototype.slice,
       each = Array.prototype.forEach,
-      re_blank = /^[\s\ufeff\xa0]*$/;
+      re_blank = /^[\s\ufeff\xa0]*$/,
+
+      dom = {
+        header: query('header')[0],
+        burg: query('.burg')[0],
+        nav: query('nav')[0],
+        bigmap: query('.bigmap')[0],
+        mapcontainer: query('.map-container')[0]
+      };
 
     function query(sel, el) {
       return slice.call((el || doc).querySelectorAll(sel), 0);
@@ -593,6 +609,46 @@
       }
     });
 
+    // hamburger menu
+    (function(mq) {
+
+      handleBurg(mq);
+      mq.addListener(handleBurg);
+
+      function handleBurg(mq) {
+        mq.matches ? yesBurg() : noBurg();
+      }
+
+      var burgClick,
+        navClick;
+
+      function yesBurg() {
+        var active;
+        // close burg on nav click
+        addEvent(dom.nav, 'click', navClick = function() {
+          active = false;
+          dom.burg.classList.remove('active');
+        });
+        // toggle nav on burg click
+        addEvent(dom.burg, 'click', burgClick = function(e) {
+          if (active = !active) {
+            dom.burg.classList.add('active');
+          } else {
+            dom.burg.classList.remove('active');
+          }
+        });
+      }
+
+      function noBurg(){
+        if (burgClick) {
+          dom.burg.classList.remove('active');
+          dom.nav.removeEventListener('click', navClick, false);
+          dom.burg.removeEventListener('click', burgClick, false);
+          burgClick = navClick = null;
+        }
+      }
+    })(win.matchMedia('(max-width: 450px)'));
+
     var map;
     domready(function() {
 
@@ -612,31 +668,32 @@
         styles: [{"featureType":"landscape","stylers":[{"saturation":-100},{"lightness":65},{"visibility":"on"}]},{"featureType":"poi","stylers":[{"saturation":-100},{"lightness":51},{"visibility":"simplified"}]},{"featureType":"road.highway","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"road.arterial","stylers":[{"saturation":-100},{"lightness":30},{"visibility":"on"}]},{"featureType":"road.local","stylers":[{"saturation":-100},{"lightness":40},{"visibility":"on"}]},{"featureType":"transit","stylers":[{"saturation":-100},{"visibility":"simplified"}]},{"featureType":"administrative.province","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"labels","stylers":[{"visibility":"on"},{"lightness":-25},{"saturation":-100}]},{"featureType":"water","elementType":"geometry","stylers":[{"hue":"#ffff00"},{"lightness":-25},{"saturation":-97}]}]
       });
 
+      // don't need their events
+      google.maps.event.clearInstanceListeners(map);
 
-      var bigmapEl = query('.bigmap')[0],
-        scaleEl = query('.map-container')[0],
-        bigmapHeight = bigmapEl.offsetHeight,
-        scaleReq,
-        centerReq,
+      var bigmapHeight = dom.bigmap.offsetHeight,
+        scaleFrame,
+        centerFrame,
         center;
 
       addEvent(win, 'orientationchange resize', function() {
-        bigmapHeight = bigmapEl.offsetHeight;
+        bigmapHeight = dom.bigmap.offsetHeight;
         center = center || map.getCenter();
 
-        win.clearTimeout(centerReq);
-        centerReq = win.setTimeout(function() {
+        win.clearTimeout(centerFrame);
+        centerFrame = win.setTimeout(function() {
           map.panTo(center);
           center = null;
         }, 100);
       });
 
+      // bigmap scroll effect
       addEvent(doc, 'scroll', function() {
         var top;
-        if (!scaleReq && bigmapHeight >= (top = win.pageYOffset)) {
-          scaleReq = win.requestAnimationFrame(function() {
-            scaleEl.style.transform = 'translateY(' + top / 3.33 + 'px)';
-            scaleReq = null;
+        if (!scaleFrame && bigmapHeight >= (top = win.pageYOffset)) {
+          scaleFrame = win.requestAnimationFrame(function() {
+            dom.mapcontainer.style.transform = 'translateY(' + top / 3.33 + 'px)';
+            scaleFrame = null;
           });
         }
       });
