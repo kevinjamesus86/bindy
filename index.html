@@ -631,26 +631,15 @@
         }, 100);
       });
 
-      scaleIt();
       addEvent(doc, 'scroll', function() {
-        scaleIt();
-      });
-      function scaleIt() {
         var top;
-        if (!scaleReq && bigmapHeight >= (top = getPageYOffset())) {
+        if (!scaleReq && bigmapHeight >= (top = win.pageYOffset)) {
           scaleReq = win.requestAnimationFrame(function() {
-            var scale = 1 + top / bigmapHeight / 3.33,
-              translateY = top / 3.33;
-
-            scaleEl.style.transform = ' scale(' + scale + ')' +
-                                      ' translateY(' + translateY + 'px)';
+            scaleEl.style.transform = 'translateY(' + top / 3.33 + 'px)';
             scaleReq = null;
           });
         }
-      }
-      function getPageYOffset() {
-        return win.pageYOffset ||  doc.documentElement.scrollTop || doc.body.scrollTop;
-      }
+      });
     });
 
   </script>
