@@ -636,8 +636,8 @@
         scaleIt();
       });
       function scaleIt() {
-        var top = win.pageYOffset ||  doc.documentElement.scrollTop || doc.body.scrollTop;
-        if (!scaleReq && bigmapHeight >= top) {
+        var top;
+        if (!scaleReq && bigmapHeight >= (top = getPageYOffset())) {
           scaleReq = win.requestAnimationFrame(function() {
             var scale = 1 + top / bigmapHeight / 3.33;
             scaleEl.style.transform = 'scale(' + scale + ') translateZ(0px)';
@@ -645,7 +645,9 @@
           });
         }
       }
-
+      function getPageYOffset() {
+        return win.pageYOffset ||  doc.documentElement.scrollTop || doc.body.scrollTop;
+      }
     });
 
   </script>
