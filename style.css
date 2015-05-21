@@ -78,6 +78,13 @@ nav a {
   text-shadow: 0 1px #fff;
 }
 
+nav img {
+  top: -1px;
+  margin-right: 8px;
+  vertical-align: middle;
+  position: relative;
+}
+
 .burg {
   height: 60px;
   padding: 20px 24px;
@@ -102,7 +109,7 @@ nav a {
   background-color: #4788e0;
 }
 
-@media (max-width: 450px) {
+@media (max-width: 580px) {
   nav {
     display: none;
     background-color: #fff;
