@@ -731,10 +731,14 @@
 
     // bigmap scroll effect
     addEvent(doc, 'scroll', function() {
-      var top;
+      var top,
+        scale;
       if (!scaleFrame && bigmapHeight >= (top = win.pageYOffset)) {
+        scale = 1 + top / bigmapHeight / 3.33;
         scaleFrame = win.requestAnimationFrame(function() {
-          dom.mapcontainer.style.transform = 'translateY(' + top / 3.33 + 'px)';
+          dom.mapcontainer.style.WebkitTransform = 'translateY(' + top / 2 + 'px) scale(' + scale + ')';
+              dom.mapcontainer.style.msTransform = 'translateY(' + top / 2 + 'px) scale(' + scale + ')';
+                dom.mapcontainer.style.transform = 'translateY(' + top / 2 + 'px) scale(' + scale + ')';
           scaleFrame = null;
         });
       }
