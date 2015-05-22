@@ -104,14 +104,7 @@
     }
 
     each(eventMatcher(types), function(type) {
-      var fns = events[type] = events[type] || [],
-        listener = addListener(instance, type, eventInjector),
-        self = instance;
-
-      fns.push(listener);
-      uuid.set(listener, id);
-
-      function eventInjector(event) {
+      function wrappedHandler(event) {
         event = event || {};
         event.event = type;
         event.timeStamp = Date.now();
@@ -121,6 +114,13 @@
           fn.call(self, event) :
           fn.apply(self, [event].concat(slice.call(arguments, 1)));
       }
+
+      var self = instance,
+        fns = events[type] = events[type] || [],
+        listener = addListener(self, type, wrappedHandler);
+
+      fns.push(listener);
+      uuid.set(listener, id);
     });
   }
 
