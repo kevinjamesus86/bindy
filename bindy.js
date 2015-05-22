@@ -29,7 +29,7 @@
     },
 
     isFunction = function(f) {
-      return 'function' == typeof f;
+      return 'function' === typeof f;
     },
 
     eventMatcher = function(s) {
@@ -93,7 +93,7 @@
       fn = function(event) {
         _off(events, [event.event], id);
 
-        return arguments.length == 1 ?
+        return arguments.length === 1 ?
           origFn.call(this, event) :
           origFn.apply(this, arguments);
       };
@@ -152,9 +152,9 @@
     var one = arguments[2] === ONE,
       argType = typeof types;
     if (types) {
-      if ('string' == argType) {
+      if ('string' === argType) {
         _on(this, types, fn, one);
-      } else if ('object' == argType) {
+      } else if ('object' === argType) {
         for (var type in types) {
           if (isFunction(types[type])) {
             _on(this, type, types[type], one);
@@ -173,7 +173,7 @@
       type;
 
     if (!events) {
-      if (1 == numArgs && true === types) {
+      if (1 === numArgs && true === types) {
         eventNs.clearInstanceListeners(self);
         dataStore.discard(self);
       }
@@ -186,7 +186,7 @@
     }
 
     // types-object
-    if (types && 'object' == argType) {
+    if (types && 'object' === argType) {
       for (type in types) {
         if (isFunction(fn = types[type]) && uuid.has(fn)) {
           _off(events, eventMatcher(type), uuid.get(fn));
@@ -196,8 +196,8 @@
     }
 
     // remove all events optionally associated with fn
-    if ('string' == argType) {
-      if (null == fn || isFunction(fn) && uuid.has(fn)) {
+    if ('string' === argType) {
+      if (!fn || isFunction(fn) && uuid.has(fn)) {
         _off(events, eventMatcher(types), fn && uuid.get(fn));
       }
       return self;
@@ -212,7 +212,7 @@
     }
 
     // remove all the events, actually
-    if (!numArgs || 1 == numArgs && true === types) {
+    if (!numArgs || 1 === numArgs && true === types) {
       _off(events, keys(events));
       dataStore.discard(self);
       clear(events);
@@ -228,7 +228,7 @@
 
   MVCObjectProto.trigger = function trigger(type) {
     var args = [this, type, {triggered:true}];
-    if (1 == arguments.length) {
+    if (1 === arguments.length) {
       eventNs.trigger(args[0], args[1], args[2]);
     } else {
       eventNs.trigger.apply(null, args.concat(slice.call(arguments, 1)));
