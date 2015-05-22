@@ -12,7 +12,6 @@
     slice = [].slice,
     hasOwn = {}.hasOwnProperty,
     keys = Object.keys,
-    defineProperty = Object.defineProperty,
 
     each = function(o, fn) {
       if (o) {
@@ -39,6 +38,19 @@
     eventMatcher = function(s) {
       return s.match(/\S+/g);
     };
+
+  var defineProperty = (function(define, obj) {
+    if (isFunction(define)) {
+      // IE 8 only supports DOM objects
+      try {
+        define(obj, 'i', { value: 0 });
+        return define;
+      } catch (e) {  }
+    }
+    return function defineProperty(o, prop, descriptor) {
+      return o[prop] = descriptor.value, o;
+    };
+  })(Object.defineProperty, {});
 
   var dataKey = 'bindy_' + Date.now().toString(32);
   var dataStore = {
