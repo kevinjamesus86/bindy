@@ -18,7 +18,9 @@
       if (o) {
         var len = o.length,
           i = -1;
-        while (++i < len) fn(o[i]);
+        while (++i < len) {
+          fn(o[i]);
+        }
       }
     },
 
