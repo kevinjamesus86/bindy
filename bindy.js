@@ -26,7 +26,9 @@
 
     clear = function(o) {
       for (var k in o) {
-        delete o[k];
+        if (hasOwn.call(o, k)) {
+          delete o[k];
+        }
       }
     },
 
@@ -87,7 +89,7 @@
       origFn;
 
     if (!(events = data.events)) {
-      events = data.events = Object.create(null);
+      events = data.events = {};
     }
 
     if (one) {
