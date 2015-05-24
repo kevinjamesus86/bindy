@@ -179,7 +179,7 @@ poi.on('click position_changed', function handler(event) {
 
 ```js
 // remove all events that bindy knows about, i.e.
-// any events that we're added via #on() or #one()
+// any events that were added via #on() or #one()
 poi.off();
 
 // remove all events, period
