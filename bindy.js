@@ -2,43 +2,92 @@
  * bindy - a jQuery like event API for the Google Maps MVCObject and its chilluns
  * license MIT (c) Kevin James 2015
  * https://github.com/kevinjamesus86/bindy
-*/
-(function(gMaps) {
+ */
+(function(root, factory) {
+
+  // universal module definition
+  if ('function' === typeof define && define.amd) {
+    // AMD
+    define([], factory);
+  } else if ('object' === typeof exports) {
+    // CommonJS
+    module.exports = factory();
+  } else {
+    // browser global
+    root.bindy = factory();
+  }
+
+})(this, function bindyFactory() {
   'use strict';
 
-  var eventNs = gMaps.event,
-    MVCObjectProto = gMaps.MVCObject.prototype,
+  // google.maps.event namespace
+  var eventNs;
 
-    slice = [].slice,
-    hasOwn = {}.hasOwnProperty,
+  // keep your friends close and your vars closer
+  var hasOwn = {}.hasOwnProperty,
     keys = Object.keys,
+    slice = [].slice;
 
-    each = function(o, fn) {
-      if (o) {
-        var len = o.length,
-          i = -1;
-        while (++i < len) {
-          fn(o[i]);
-        }
+  /**
+   * Iterate over an array of items invoking fn on
+   * each item in the array
+   *
+   * @param {Array} o
+   * @param {Function} fn
+   * @api private
+   */
+  function each(o, fn) {
+    if (o) {
+      var len = o.length,
+        i = -1;
+      while (++i < len) {
+        fn(o[i]);
       }
-    },
+    }
+  }
 
-    clear = function(o) {
-      for (var k in o) {
-        if (hasOwn.call(o, k)) {
-          delete o[k];
-        }
+  /**
+   * Delete every own property in an object
+   *
+   * @param {Object} o
+   * @api private
+   */
+  function clear(o) {
+    for (var k in o) {
+      if (hasOwn.call(o, k)) {
+        delete o[k];
       }
-    },
+    }
+  }
 
-    isFunction = function(f) {
-      return 'function' === typeof f;
-    },
+  /**
+   * Determines if `fn` is a function
+   *
+   * @param {*} fn
+   * @api private
+   */
+  function isFunction(fn) {
+    return 'function' === typeof fn;
+  }
 
-    eventMatcher = function(s) {
-      return s.match(/\S+/g);
-    };
+  /**
+   * Returns an array of event strings
+   *
+   * @param {string} s
+   * @api private
+   */
+  function matchEvents(s) {
+    return s.match(/\S+/g);
+  }
 
+  /**
+   * Defines a new property on an object
+   *
+   * @param {Object} o
+   * @param {string} prop
+   * @param {Object} descriptor
+   * @api private
+   */
   var defineProperty = (function(define, obj) {
     if (isFunction(define)) {
       // IE 8 only supports DOM objects
@@ -52,6 +101,9 @@
     };
   })(Object.defineProperty, {});
 
+  /**
+   *
+   */
   var dataKey = 'bindy_' + Date.now().toString(32);
   var dataStore = {
     has: function(o) {
@@ -76,6 +128,9 @@
     }
   };
 
+  /**
+   *
+   */
   var uuidKey = 'bindyuuid_' + Date.now().toString(32);
   var uuid = {
     uuid: 0,
@@ -93,6 +148,15 @@
     }
   };
 
+  /**
+   * Adds the given listener function to the given events for the given object instance.
+   *
+   * @param {Object} instance
+   * @param {string} types
+   * @param {Function} fn
+   * @param {boolean} one
+   * @api private
+   */
   function _on(instance, types, fn, one) {
     var addListener = one ? eventNs.addListenerOnce : eventNs.addListener,
       data = dataStore.get(instance),
@@ -115,9 +179,19 @@
       };
     }
 
-    each(eventMatcher(types), function(type) {
+    each(matchEvents(types), function(type) {
       function wrappedHandler(event) {
         event = event || {};
+        /**
+         * When we trigger an event the fo event object
+         * is used as the event for multiple handlers if
+         * there are multiple listeners for said event.
+         * We need the event object to be unique to assign it
+         * the uuid of it's handler for use with the #off function.
+         */
+        if (event.triggered) {
+          event = shallowCopy(event);
+        }
         event.event = type;
         event.timeStamp = Date.now();
         uuid.set(event, id);
@@ -136,6 +210,31 @@
     });
   }
 
+  /**
+   * Shallow copies an objects own properties
+   *
+   * @param {Object} o
+   * @api private
+   */
+  function shallowCopy(o) {
+    var copy = {};
+    for (var prop in o) {
+      if (hasOwn.call(o, prop)) {
+        copy[prop] = o[prop];
+      }
+    }
+    return copy;
+  }
+
+  /**
+   * Removes events previously bound to an instance, optionally
+   * filtered by an event handler id
+   *
+   * @param {Object} events
+   * @param {string} types
+   * @param {number=} id
+   * @api private
+   */
   function _off(events, types, id) {
     var removeListener = eventNs.removeListener;
     id |= 0;
@@ -160,11 +259,24 @@
   }
 
   var ONE = {};
-  MVCObjectProto.one = function one(types, fn) {
+  /**
+   * Like _on except any given handler may not be run more than one time per event
+   *
+   * @param {string} types
+   * @param {Function} fn
+   */
+  function one(types, fn) {
     return this.on(types, fn, ONE);
-  };
+  }
 
-  MVCObjectProto.on = function on(types, fn /*, INTERNAL one */ ) {
+  /**
+   * Public API for _on
+   *
+   * @param {string} types
+   * @param {Function} fn
+   * @param {Object} one
+   */
+  function on(types, fn /*, INTERNAL one */ ) {
     var one = arguments[2] === ONE,
       argType = typeof types;
     if (types) {
@@ -179,9 +291,15 @@
       }
     }
     return this;
-  };
+  }
 
-  MVCObjectProto.off = function off(types, fn) {
+  /**
+   * Public API for _off
+   *
+   * @param {(Object|string|boolean)=} types
+   * @param {Function=} fn
+   */
+  function off(types, fn) {
     var events = dataStore.has(this) && dataStore.get(this).events,
       numArgs = arguments.length,
       argType = typeof types,
@@ -205,7 +323,7 @@
     if (types && 'object' === argType) {
       for (type in types) {
         if (isFunction(fn = types[type]) && uuid.has(fn)) {
-          _off(events, eventMatcher(type), uuid.get(fn));
+          _off(events, matchEvents(type), uuid.get(fn));
         }
       }
       return self;
@@ -214,7 +332,7 @@
     // remove all events optionally associated with fn
     if ('string' === argType) {
       if (!fn || isFunction(fn) && uuid.has(fn)) {
-        _off(events, eventMatcher(types), fn && uuid.get(fn));
+        _off(events, matchEvents(types), fn && uuid.get(fn));
       }
       return self;
     }
@@ -240,9 +358,16 @@
     }
 
     return self;
-  };
+  }
 
-  MVCObjectProto.trigger = function trigger(type) {
+  /**
+   * Triggers the given event. All arguments after type are
+   * passed as arguments to the listeners.
+   *
+   * @param {string} type
+   * @param {...*=} var_args
+   */
+  function trigger(type /*, var_args */ ) {
     var args = [this, type, {triggered:true}];
     if (1 === arguments.length) {
       eventNs.trigger(args[0], args[1], args[2]);
@@ -250,6 +375,40 @@
       eventNs.trigger.apply(null, args.concat(slice.call(arguments, 1)));
     }
     return this;
-  };
+  }
 
-})(this.google.maps);
+  bindy.init = bindy;
+  /**
+   * @param {Object} google
+   */
+  function bindy(google) {
+    google = google || window && window.google;
+
+    if (google) {
+      eventNs = google.maps.event;
+
+      if (!bindy.extended) {
+        bindy.extended = true;
+        extendBaseKVOClass(google.maps.MVCObject);
+      }
+    }
+  }
+
+  /**
+   * Extend MVCObject with the *awesomeness* found above
+   *
+   * @param {MVCObject} Class
+   */
+  function extendBaseKVOClass(Class) {
+    Class.prototype.on = on;
+    Class.prototype.one = one;
+    Class.prototype.off = off;
+    Class.prototype.trigger = trigger;
+  }
+
+  if ('object' === typeof google && google.maps) {
+    bindy(google);
+  }
+
+  return bindy;
+});
