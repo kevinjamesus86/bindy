@@ -1,0 +1,20 @@
+{
+  "name": "bindy",
+  "version": "0.1.0",
+  "repository": "kevinjamesus86/bindy",
+  "description": "jQuery like event API for Google Maps v3 MVCObject chilluns",
+  "author": "Kevin James",
+  "keywords": [
+    "jQuery",
+    "Google Maps v3",
+    "event"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "grunt": "^0.4.5",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-mocha-cov": "^0.4.0",
+    "wolfy87-eventemitter": "^4.2.11"
+  }
+}
